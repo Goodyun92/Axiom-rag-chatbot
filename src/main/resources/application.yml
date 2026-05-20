@@ -9,9 +9,10 @@ spring:
     virtual:
       enabled: true
 
-  # 로컬 PostgreSQL (pgvector) 연동
+  # 로컬(Docker) 및 클라우드(Neon DB) 유연한 연동 설정
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME:spring_ai_db}
+    # 핵심 변경: 환경 변수가 들어오면 Neon DB 주소 전체를 쓰고, 없으면 로컬 기본 주소로 작동함
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/spring_ai_db}
     username: ${DB_USER:myuser}
     password: ${DB_PASSWORD:mypassword}
     driver-class-name: org.postgresql.Driver
@@ -24,7 +25,7 @@ spring:
 
   ai:
     openai:
-      # 로컬 환경변수 주입
+      # 로컬 .env 또는 클라우드 환경변수 주입
       api-key: ${OPENAI_API_KEY}
       chat:
         options:
@@ -38,8 +39,8 @@ spring:
         index-type: HNSW
         distance-type: COSINE_DISTANCE
         dimensions: 1536
-        # true로 설정 시 vector extension 및 테이블 자동 생성
+        # 최초 연동 시에만 테이블을 자동 생성하도록 true 유지
         initialize-schema: true
 
 server:
-  port: 8080
+  port: ${PORT:8080} # Render는 배포 시 무작위 포트를 할당하므로 포트 유연화 필수
