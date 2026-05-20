@@ -97,12 +97,12 @@ public class RagChatService {
                     
                     // 티어(Tier) 구분 로직
                     int tier;
-                    if (group.bestDistance <= 0.25) {
+                    if (group.bestDistance <= 0.38) {
                         tier = 1; // 초록/에메랄드 (유사도 매우 높음)
-                    } else if (group.bestDistance <= 0.35) {
-                        tier = 2; // 파랑/보라 (유사도 높음)
+                    } else if (group.bestDistance <= 0.45) {
+                        tier = 2; // 탁한 초록 (유사도 높음)
                     } else {
-                        tier = 3; // 주황/회색 (유사도 보통)
+                        tier = 3; // 회색 (유사도 보통)
                     }
                     
                     return new ChatResponse.SourceItem(text, tier);
@@ -117,7 +117,7 @@ public class RagChatService {
         String systemPromptTemplate = """
                 당신은 문서 기반 질의응답(RAG) 어시스턴트입니다.
                 아래 제공된 [Context] 정보만을 사용하여 사용자의 [Question]에 한국어로 답변하세요.
-                [Context]에 없는 내용은 답변하지 말고, '제공된 문서에서 관련된 정보를 찾을 수 없습니다.'라고 답변하세요.
+                [Context]에 없는 내용이거나 관련 정보를 찾을 수 없는 경우, 반드시 'E999'라는 코드만을 답변으로 출력하세요. 다른 설명이나 사족은 덧붙이지 마십시오.
                 
                 [Context]
                 %s
@@ -141,11 +141,10 @@ public class RagChatService {
                 .call()
                 .content();
 
-        boolean isNotFound = answer.contains("정보를 찾을 수 없") || 
-                             (answer.contains("문서") && answer.contains("없습니다"));
+        boolean isNotFound = answer.contains("E999");
 
         if (isNotFound) {
-            return new ChatResponse(answer, List.of());
+            return new ChatResponse("제공된 문서에서 관련된 정보를 찾을 수 없습니다.", List.of());
         }
 
         return new ChatResponse(answer, sources);

@@ -55,7 +55,7 @@ public class WebController {
             log.info("문서 추가 요청됨: 파일명={}", file.getOriginalFilename());
             documentService.processAndSavePdf(file);
             log.info("문서 추가 성공: 파일명={}", file.getOriginalFilename());
-            redirectAttributes.addFlashAttribute("message", "파일 업로드 및 벡터화가 성공적으로 완료되었습니다.");
+            redirectAttributes.addFlashAttribute("message", "[" + file.getOriginalFilename() + "] 파일 업로드 및 벡터화가 성공적으로 완료되었습니다.");
         } catch (Exception e) {
             log.error("문서 추가 중 오류 발생: 파일명={}", file.getOriginalFilename(), e);
             redirectAttributes.addFlashAttribute("error", "파일 처리 중 오류가 발생했습니다: " + e.getMessage());
