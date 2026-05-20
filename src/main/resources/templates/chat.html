@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Axiom - 채팅</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .message-enter { animation: slideUp 0.3s ease-out forwards; opacity: 0; transform: translateY(10px); }
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#6366f1', secondary: '#a855f7', ai: '#1e293b' }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-200 h-screen flex flex-col overflow-hidden selection:bg-primary selection:text-white">
+    <!-- Navbar -->
+    <nav class="flex-shrink-0 z-50 glass border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white shadow-lg shadow-primary/30">A</div>
+                    <span class="font-bold text-xl tracking-tight text-white">Axiom</span>
+                </div>
+                <div class="flex space-x-1">
+                    <a href="/documents" class="px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 font-medium transition-all">문서관리</a>
+                    <a href="/chat" class="px-4 py-2 rounded-lg bg-white/10 text-white font-medium transition-all">채팅</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Chat Area -->
+    <main class="flex-1 flex flex-col w-full relative min-h-0 overflow-hidden">
+        <!-- Messages -->
+        <div id="chatBox" class="flex-1 overflow-y-auto scrollbar-hide w-full pb-56">
+            <div id="chatContent" class="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+                <!-- Initial AI Message -->
+                <div class="flex items-start space-x-4 message-enter">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <div class="flex-1">
+                        <div class="glass bg-ai/50 rounded-2xl rounded-tl-sm px-6 py-4 inline-block max-w-[85%] border border-white/5">
+                            <p class="text-slate-200 leading-relaxed">안녕하세요! 업로드된 문서의 내용에 대해 무엇이든 질문해 주세요. 문서를 기반으로 정확한 답변과 출처를 제공해 드립니다.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="absolute bottom-6 left-0 right-0 pointer-events-none">
+            <div class="max-w-4xl mx-auto w-full px-4 sm:px-6 lg:px-8 pointer-events-auto">
+                <div id="loadingIndicator" class="hidden mb-3 w-full flex justify-center">
+                    <div class="glass inline-flex items-center space-x-2 px-4 py-2 rounded-full text-primary text-sm font-medium border border-primary/20">
+                        <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>문서 탐색 및 답변 생성 중...</span>
+                    </div>
+                </div>
+                
+                <form id="chatForm" class="relative group">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-500"></div>
+                    <div class="relative flex items-end bg-slate-900 border border-white/10 rounded-2xl shadow-2xl p-2 pl-4 focus-within:border-primary/50 transition-colors">
+                        <textarea id="question" rows="1" class="flex-1 bg-transparent text-slate-200 placeholder-slate-500 focus:outline-none resize-none py-3 max-h-32 scrollbar-hide" placeholder="질문을 입력하세요... (Enter로 전송, Shift+Enter로 줄바꿈)" required></textarea>
+                        <button type="submit" class="flex-shrink-0 ml-2 p-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl hover:shadow-lg hover:shadow-primary/30 transform hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <svg class="w-5 h-5 transform rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-3 text-xs text-slate-500">
+                    AI는 부정확한 정보를 제공할 수 있으므로, 출처 문서를 직접 확인하시기 바랍니다.
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const chatBox = $('#chatBox');
+            const chatContent = $('#chatContent');
+            const questionInput = $('#question');
+            const chatForm = $('#chatForm');
+            const loadingIndicator = $('#loadingIndicator');
+            const submitBtn = chatForm.find('button[type="submit"]');
+
+            // 세션 스토리지에서 이전 채팅 내역 복원
+            const savedHistory = sessionStorage.getItem('ragChatHistory');
+            if (savedHistory) {
+                chatContent.html(savedHistory);
+                chatBox.scrollTop(chatBox[0].scrollHeight);
+            }
+
+            // 현재 채팅 내역을 세션 스토리지에 저장하는 함수
+            function saveHistory() {
+                sessionStorage.setItem('ragChatHistory', chatContent.html());
+            }
+
+            questionInput.on('input', function() {
+                this.style.height = 'auto';
+                this.style.height = (this.scrollHeight) + 'px';
+            });
+
+            questionInput.on('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    chatForm.submit();
+                }
+            });
+
+            chatForm.on('submit', function(e) {
+                e.preventDefault();
+                const question = questionInput.val().trim();
+                if (!question) return;
+
+                questionInput.val('').css('height', 'auto').prop('disabled', true);
+                submitBtn.prop('disabled', true);
+
+                const userHtml = `
+                    <div class="flex items-start justify-end space-x-4 message-enter">
+                        <div class="flex-1 flex justify-end">
+                            <div class="bg-gradient-to-br from-primary to-secondary rounded-2xl rounded-tr-sm px-6 py-4 inline-block max-w-[85%] shadow-lg shadow-primary/20">
+                                <p class="text-white leading-relaxed">${escapeHtml(question)}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                chatContent.append(userHtml);
+                saveHistory();
+                scrollToBottom();
+                loadingIndicator.removeClass('hidden');
+
+                $.post('/chat/ask', { question: question }, function(response) {
+                    loadingIndicator.addClass('hidden');
+                    questionInput.prop('disabled', false).focus();
+                    submitBtn.prop('disabled', false);
+                    
+                    let sourcesHtml = '';
+                    if (response.sources && response.sources.length > 0) {
+                        const sourcesList = response.sources.map(src => {
+                            let colorClasses = '';
+                            if (src.tier === 1) {
+                                colorClasses = 'bg-emerald-500/20 text-emerald-300 border-emerald-400/50 font-medium'; // 쨍한 초록색 (유사도 매우 높음)
+                            } else if (src.tier === 2) {
+                                colorClasses = 'bg-emerald-950/20 text-emerald-600/70 border-emerald-950/30'; // 탁한 초록색 (유사도 높음)
+                            } else {
+                                colorClasses = 'bg-slate-900/50 text-slate-500 border-white/5'; // 회색 (유사도 보통)
+                            }
+                            
+                            return `<span class="inline-flex items-center space-x-1 px-2.5 py-1 rounded-md border text-xs ${colorClasses}">
+                                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path></svg>
+                                <span>${escapeHtml(src.text)}</span>
+                            </span>`;
+                        }).join(' ');
+                        
+                        sourcesHtml = `
+                            <div class="mt-4 pt-4 border-t border-white/10">
+                                <p class="text-xs text-slate-400 mb-2 font-medium">참조 문서</p>
+                                <div class="flex flex-col space-y-2 items-start">${sourcesList}</div>
+                            </div>
+                        `;
+                    }
+
+                    const safeAnswer = response.answer ? String(response.answer) : '응답을 받을 수 없습니다.';
+                    const formattedAnswer = safeAnswer.replace(/\n/g, '<br>');
+
+                    const aiHtml = `
+                        <div class="flex items-start space-x-4 message-enter">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </div>
+                            <div class="flex-1">
+                                <div class="glass bg-ai/50 rounded-2xl rounded-tl-sm px-6 py-4 inline-block max-w-[85%] border border-white/5">
+                                    <div class="text-slate-200 leading-relaxed">${formattedAnswer}</div>
+                                    ${sourcesHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chatContent.append(aiHtml);
+                    saveHistory();
+                    scrollToBottom();
+                }).fail(function() {
+                    loadingIndicator.addClass('hidden');
+                    questionInput.prop('disabled', false).focus();
+                    submitBtn.prop('disabled', false);
+                    
+                    const errorHtml = `
+                        <div class="flex items-start space-x-4 message-enter">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center border border-red-500/30">!</div>
+                            <div class="flex-1">
+                                <div class="bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl rounded-tl-sm px-6 py-4 inline-block max-w-[85%]">
+                                    서버와 통신하는 중 오류가 발생했습니다. 다시 시도해주세요.
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chatContent.append(errorHtml);
+                    saveHistory();
+                    scrollToBottom();
+                });
+            });
+
+            function scrollToBottom() {
+                chatBox.animate({ scrollTop: chatBox[0].scrollHeight }, 300);
+            }
+
+            function escapeHtml(unsafe) {
+                if (!unsafe) return '';
+                return String(unsafe)
+                     .replace(/&/g, "&amp;")
+                     .replace(/</g, "&lt;")
+                     .replace(/>/g, "&gt;")
+                     .replace(/"/g, "&quot;")
+                     .replace(/'/g, "&#039;");
+            }
+        });
+    </script>
+</body>
+</html>

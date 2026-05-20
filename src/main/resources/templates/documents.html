@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Axiom - 문서관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.05); }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1',
+                        secondary: '#a855f7'
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-950 text-slate-200 min-h-screen selection:bg-primary selection:text-white pb-12">
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 glass border-b border-white/10">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-secondary flex items-center justify-center font-bold text-white shadow-lg shadow-primary/30">A</div>
+                    <span class="font-bold text-xl tracking-tight text-white">Axiom</span>
+                </div>
+                <div class="flex space-x-1">
+                    <a href="/documents" class="px-4 py-2 rounded-lg bg-white/10 text-white font-medium transition-all">문서관리</a>
+                    <a href="/chat" class="px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 font-medium transition-all">채팅</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-28 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <!-- Header -->
+        <div class="mb-10 text-center animate-[fadeIn_0.5s_ease-out]">
+            <h1 class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary mb-3">Edit Doc Base ...</h1>
+            <p class="text-slate-400 text-lg">AI가 학습할 PDF 문서를 업로드하고 관리하세요.</p>
+        </div>
+
+        <!-- Alerts -->
+        <div th:if="${message}" class="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 flex items-center space-x-3 backdrop-blur-sm">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <span th:text="${message}">성공 메시지</span>
+        </div>
+        <div th:if="${error}" class="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 flex items-center space-x-3 backdrop-blur-sm">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span th:text="${error}">에러 메시지</span>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-8">
+            <!-- Upload Card -->
+            <div class="lg:col-span-1">
+                <div class="glass rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="flex items-center space-x-3 mb-6">
+                            <div class="p-2.5 rounded-lg bg-primary/20 text-primary">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                            </div>
+                            <h2 class="text-xl font-semibold text-white">문서 업로드</h2>
+                        </div>
+                        
+                        <form action="/documents/upload" method="post" enctype="multipart/form-data" class="space-y-4">
+                            <div class="relative">
+                                <input type="file" id="file" name="file" accept=".pdf" required 
+                                    class="block w-full text-sm text-slate-400
+                                    file:mr-4 file:py-2.5 file:px-4
+                                    file:rounded-lg file:border-0
+                                    file:text-sm file:font-medium
+                                    file:bg-primary/20 file:text-primary
+                                    hover:file:bg-primary/30 transition-all cursor-pointer bg-slate-900/50 rounded-xl border border-white/5 p-2" />
+                            </div>
+                            <button type="submit" class="w-full py-3 px-4 rounded-xl font-semibold text-white bg-gradient-to-r from-primary to-secondary hover:shadow-lg hover:shadow-primary/25 transform hover:-translate-y-0.5 transition-all duration-200">
+                                업로드 및 분석
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List Card -->
+            <div class="lg:col-span-2">
+                <div class="glass rounded-2xl shadow-2xl overflow-hidden border border-white/5">
+                    <div class="p-6 border-b border-white/5 flex items-center space-x-3 bg-white/[0.02]">
+                        <div class="p-2.5 rounded-lg bg-secondary/20 text-secondary">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                        </div>
+                        <h2 class="text-xl font-semibold text-white">저장된 문서 (Vector DB)</h2>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/50 text-slate-400 text-sm uppercase tracking-wider">
+                                    <th class="py-4 px-6 font-medium">#</th>
+                                    <th class="py-4 px-6 font-medium">파일명</th>
+                                    <th class="py-4 px-6 font-medium text-right">상태</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5 text-slate-300">
+                                <tr th:each="file, stat : ${files}" class="hover:bg-white/[0.02] transition-colors group">
+                                    <td class="py-4 px-6" th:text="${stat.count}">1</td>
+                                    <td class="py-4 px-6 font-medium flex items-center space-x-3">
+                                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                                        <span th:text="${file.file_name}" class="group-hover:text-primary transition-colors">파일명.pdf</span>
+                                    </td>
+                                    <td class="py-4 px-6 text-right">
+                                        <div class="flex items-center justify-end space-x-3">
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-500/20">
+                                                학습 완료
+                                            </span>
+                                            <form action="/documents/delete" method="post" class="inline">
+                                                <input type="hidden" name="fileName" th:value="${file.file_name}" />
+                                                <button type="submit" class="p-1 text-slate-500 hover:text-red-400 hover:bg-red-400/10 rounded transition-all" title="삭제">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr th:if="${#lists.isEmpty(files)}">
+                                    <td colspan="3" class="py-12 text-center text-slate-500">
+                                        <svg class="w-12 h-12 mx-auto mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                        등록된 문서가 없습니다. 새로운 PDF를 업로드해보세요.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>
