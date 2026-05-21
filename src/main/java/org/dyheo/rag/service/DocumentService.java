@@ -3,7 +3,8 @@ package org.dyheo.rag.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
+import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.core.io.ByteArrayResource;
@@ -33,7 +34,12 @@ public class DocumentService {
                 }
             };
 
-            TikaDocumentReader pdfReader = new TikaDocumentReader(resource);
+            PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(resource,
+                    PdfDocumentReaderConfig.builder()
+                            .withPageTopMargin(0)
+                            .withPageBottomMargin(0)
+                            .withPagesPerDocument(1)
+                            .build());
 
             List<Document> documents = pdfReader.get();
             log.info("Extracted {} pages from PDF", documents.size());
