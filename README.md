@@ -4,11 +4,11 @@
   <tr>
     <td width="50%" align="center">
       <b>📄 문서 관리 페이지</b><br><br>
-      <img src="https://github.com/user-attachments/assets/23948804-b04a-49d3-92ee-dc26a88dea3b" width="100%" alt="docbase-page" />
+      <img src="https://github.com/user-attachments/assets/7d5249f0-947f-43d8-a672-9c2a946c77ae" width="100%" alt="docbase-page" />
     </td>
     <td width="50%" align="center">
-      <b>💬 RAG 챗봇 페이지</b><br><br>
-      <img src="https://github.com/user-attachments/assets/ddfd5bb2-bfda-4af8-adb3-68289969918c" width="100%" alt="chat-page" />
+      <b>💬 채팅 페이지</b><br><br>
+      <img src="https://github.com/user-attachments/assets/2c0ce910-3d38-4fbc-92bd-43979d5c370c" width="100%" alt="chat-page" />
     </td>
   </tr>
 </table>
