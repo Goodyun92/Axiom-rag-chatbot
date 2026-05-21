@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.dyheo.rag.dto.ChatResponse;
 import org.dyheo.rag.service.DocumentService;
 import org.dyheo.rag.service.RagChatService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +25,11 @@ public class WebController {
     private final DocumentService documentService;
     private final RagChatService ragChatService;
     private final JdbcTemplate jdbcTemplate;
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
     @GetMapping("/")
     public String index() {

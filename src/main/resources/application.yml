@@ -3,6 +3,10 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: rag
+  security:
+    user:
+      name: admin
+      password: ${SECURITY_PASSWORD}
     
   # 가상 스레드 활성화 (Java 21/25 최적화)
   threads:
