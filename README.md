@@ -13,6 +13,8 @@
   </tr>
 </table>
 
+<a href="https://axiom-rag-chatbot.onrender.com" target="_blank">🔗 접속하기</a>
+
 ---
 
 ## 개요 및 사용 기술
